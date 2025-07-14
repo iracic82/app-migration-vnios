@@ -29,27 +29,23 @@ if not aws_access_key_id or not aws_secret_access_key or not hosted_zone_id:
     sys.exit(1)
 
 # ---------------------------
-# Participant + IPs from env
+# Participant + IP from env
 # ---------------------------
 participant_id = os.getenv("INSTRUQT_PARTICIPANT_ID")
 dc1_ip = os.getenv("DC1_IP")
-dc2_ip = os.getenv("DC2_IP")
 
 if not participant_id:
     log("❌ ERROR: INSTRUQT_PARTICIPANT_ID is not set")
     sys.exit(1)
 
-if not dc1_ip or not dc2_ip:
-    log("❌ ERROR: DC1_IP and DC2_IP must both be set")
+if not dc1_ip:
+    log("❌ ERROR: DC1_IP must be set")
     sys.exit(1)
 
 # ---------------------------
-# Build FQDN mappings
+# Build FQDN mapping for DC1
 # ---------------------------
-records = {
-    f"{participant_id}-dc1.iracictechguru.com.": dc1_ip,
-    f"{participant_id}-dc2.iracictechguru.com.": dc2_ip,
-}
+fqdn = f"{participant_id}-client.iracictechguru.com."
 
 # ---------------------------
 # Create boto3 session
@@ -63,34 +59,33 @@ session = boto3.Session(
 route53 = session.client("route53")
 
 # ---------------------------
-# Create A records in Route 53
+# Create A record in Route 53
 # ---------------------------
-for fqdn, ip in records.items():
-    log(f"➡️  Creating A record: {fqdn} -> {ip}")
-    try:
-        response = route53.change_resource_record_sets(
-            HostedZoneId=hosted_zone_id,
-            ChangeBatch={
-                "Comment": f"Upsert A record for {fqdn}",
-                "Changes": [
-                    {
-                        "Action": "UPSERT",
-                        "ResourceRecordSet": {
-                            "Name": fqdn,
-                            "Type": "A",
-                            "TTL": 300,
-                            "ResourceRecords": [{"Value": ip}]
-                        }
+log(f"➡️  Creating A record: {fqdn} -> {dc1_ip}")
+try:
+    response = route53.change_resource_record_sets(
+        HostedZoneId=hosted_zone_id,
+        ChangeBatch={
+            "Comment": f"Upsert A record for {fqdn}",
+            "Changes": [
+                {
+                    "Action": "UPSERT",
+                    "ResourceRecordSet": {
+                        "Name": fqdn,
+                        "Type": "A",
+                        "TTL": 300,
+                        "ResourceRecords": [{"Value": dc1_ip}]
                     }
-                ]
-            }
-        )
-        status = response['ChangeInfo']['Status']
-        log(f"✅  A record created: {fqdn} -> {ip}")
-        log(f"📡  Change status: {status}")
-    except Exception as e:
-        log(f"❌ Failed to create A record {fqdn}: {e}")
-        sys.exit(1)
+                }
+            ]
+        }
+    )
+    status = response['ChangeInfo']['Status']
+    log(f"✅  A record created: {fqdn} -> {dc1_ip}")
+    log(f"📡  Change status: {status}")
+except Exception as e:
+    log(f"❌ Failed to create A record {fqdn}: {e}")
+    sys.exit(1)
 
 # ---------------------------
 # Write log to file

@@ -1,0 +1,86 @@
+base_url: https://csp.infoblox.com
+email: ${INFOBLOX_EMAIL}
+password: ${INFOBLOX_PASSWORD}
+sandbox_id_file: sandbox_id.txt
+
+vpn_payload:
+  universal_service:
+    operation: CREATE
+    name: DEMO
+    capabilities: 
+        - type: dns
+          
+    
+
+  access_locations:
+    create:
+      - endpoint_id: ref_endpoint_Test
+        id: ref_accessLoc_SITE
+        routing_type: dynamic
+        tunnel_configs:
+          - name: Pri
+            physical_tunnels:
+              - path: primary
+                credential_id: ref_cred_test1
+                index: 0
+                access_ip: 1.1.1.1
+                bgp_configs:
+                  - asn: "64512"
+                    hop_limit: 2
+                    neighbour_ips:
+                      - "169.254.21.1"
+          - name: Sec
+            physical_tunnels:
+              - path: secondary
+                credential_id: ref_cred_test2
+                index: 0
+                access_ip: 1.2.3.4
+                bgp_configs:
+                  - asn: "64512"
+                    hop_limit: 2
+                    neighbour_ips:
+                      - "169.254.22.1"
+        type: Cloud VPN
+        name: SITE
+        cloud_type: AWS
+        cloud_region: eu-central-1
+        lan_subnets: []
+    update: []
+    delete: []
+
+  endpoints:
+    create:
+      - id: ref_endpoint_Test
+        name: Test
+        size: S
+        service_location: AWS Europe (Frankfurt)
+        service_ip: 10.10.10.3
+        neighbour_ips:
+          - 10.10.10.4
+          - 10.10.10.5
+        preferred_provider: AWS
+        routing_type: dynamic
+        routing_config:
+          bgp_config:
+            asn: "65500"
+            hold_down: 90
+            keep_alive: 30
+    update: []
+
+  credentials:
+    create:
+      - id: ref_cred_test1
+        type: psk
+        name: test1
+        value: InfobloxLab.2025
+        cred_data: {}
+      - id: ref_cred_test2
+        type: psk
+        name: test2
+        value: InfobloxLab.2025
+        cred_data: {}
+    update: []
+
+  locations:
+    create: []
+    update: []

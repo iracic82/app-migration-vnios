@@ -1,3 +1,7 @@
+# -------------------------------------
+# Provider Configuration
+# -------------------------------------
+
 terraform {
   required_providers {
     bloxone = {
@@ -25,9 +29,9 @@ provider "bloxone" {
   }
 }
 
-# -----------------------------
-# Variables
-# -----------------------------
+# -------------------------------------
+# Variable Declarations
+# -------------------------------------
 variable "ddi_api_key" {}
 variable "aws_region" {
   default = "eu-central-1"
@@ -39,9 +43,9 @@ variable "project_name" {
   default = "infoblox-aws-integration"
 }
 
-# -----------------------------
-# Lookup Realm and Federated Block
-# -----------------------------
+# -------------------------------------
+# Lookup Existing Federated Realm and Block
+# -------------------------------------
 data "bloxone_federation_federated_realms" "acme" {
   filters = {
     name = "ACME Corporation"
@@ -54,9 +58,9 @@ data "bloxone_federation_federated_blocks" "aws_block" {
   }
 }
 
-# -----------------------------
-# Create Infoblox IPAM Resources
-# -----------------------------
+# -------------------------------------
+# Infoblox IPAM: Create Space → Block → Subnet
+# -------------------------------------
 resource "bloxone_ipam_ip_space" "ip_space_acme" {
   name    = "acme-ip-space"
   comment = "IP space for ACME via Terraform"
@@ -97,6 +101,10 @@ resource "bloxone_ipam_subnet" "subnet_aws_vpc" {
   }
 }
 
+# -------------------------------------
+# Reserve a Safe IP Range within the Subnet (avoid AWS-reserved addresses)
+# -------------------------------------
+
 resource "bloxone_ipam_range" "aws_safe_range" {
   name   = "aws-safe-range"
   start  = "10.100.0.10"
@@ -112,7 +120,7 @@ resource "bloxone_ipam_range" "aws_safe_range" {
 
 
 # -------------------------------------
-# Existing AWS VPC and Subnet (by Name Tag)
+# Discover Existing AWS Network Resources (by Tag)
 # -------------------------------------
 data "aws_vpc" "existing_main" {
   filter {
@@ -144,6 +152,10 @@ data "aws_security_group" "app_sg" {
   vpc_id = data.aws_vpc.existing_main.id
 }
 
+# -------------------------------------
+# Fetch Latest Ubuntu AMI (Jammy 22.04)
+# -------------------------------------
+
 data "aws_ami" "ubuntu" {
   most_recent = true
   owners      = ["099720109477"]
@@ -153,12 +165,16 @@ data "aws_ami" "ubuntu" {
   }
 }
 
+# -------------------------------------
+# Fetch Existing Key Pair for RDP/SSH Access
+# -------------------------------------
+
 data "aws_key_pair" "rdp" {
   key_name = "instruqt-dc-key"
 }
 
 # -------------------------------------
-# Lookup Infoblox Subnet by Name
+# (Optional) Lookup Subnet Again via Infoblox Data Source
 # -------------------------------------
 data "bloxone_ipam_subnets" "existing" {
   filters = {
@@ -167,7 +183,7 @@ data "bloxone_ipam_subnets" "existing" {
 }
 
 # -------------------------------------
-# Allocate an IP from Infoblox
+# Allocate an IP Address from the Safe Range
 # -------------------------------------
 resource "bloxone_ipam_address" "app2_ip" {
   next_available_id = bloxone_ipam_range.aws_safe_range.id
@@ -182,7 +198,7 @@ resource "bloxone_ipam_address" "app2_ip" {
 }
 
 # -------------------------------------
-# Create new ENI with allocated IP
+# Create Elastic Network Interface (ENI) with Reserved IP
 # -------------------------------------
 resource "aws_network_interface" "app2_eni" {
   subnet_id       = data.aws_subnet.existing_public.id
@@ -195,7 +211,7 @@ resource "aws_network_interface" "app2_eni" {
 }
 
 # -------------------------------------
-# Launch App2 EC2 Instance with Docker App
+# Launch EC2 Instance with Dockerized App
 # -------------------------------------
 resource "aws_instance" "app2" {
   ami           = data.aws_ami.ubuntu.id
@@ -231,7 +247,7 @@ resource "aws_instance" "app2" {
 }
 
 # -------------------------------------
-# Output the IP for convenience
+# Output Assigned IP Address
 # -------------------------------------
 output "app2_ip" {
   value = bloxone_ipam_address.app2_ip.address

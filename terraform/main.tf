@@ -202,10 +202,20 @@ resource "aws_instance" "app_old" {
 
   user_data = <<-EOF
               #!/bin/bash
-              apt update -y
-              apt install -y docker.io
-              systemctl enable docker
-              docker run -d -p 5080:5080 iracic82/infoblox-migration-demo:latest
+              sudo apt update -y
+              sudo apt install -y docker.io
+              sudo systemctl enable docker
+
+              sudo hostnamectl set-hostname on-prem-app
+
+              HOSTNAME=$(hostname)
+              PRIVATE_IP=$(curl -s http://169.254.169.254/latest/meta-data/local-ipv4)
+
+              sudo docker run -d \
+                -p 5080:5080 \
+                -e EC2_HOSTNAME="$HOSTNAME" \
+                -e EC2_IP="$PRIVATE_IP" \
+                iracic82/infoblox-migration-demo:latest
             EOF
 
   tags = { Name = "app-old" }

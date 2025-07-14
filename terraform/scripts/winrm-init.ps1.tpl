@@ -43,7 +43,7 @@ try {
 Write-Host "Setting static DNS..."
 try {
     $adapter = Get-NetAdapter | Where-Object { $_.Status -eq 'Up' } | Select-Object -First 1
-    Set-DnsClientServerAddress -InterfaceIndex $adapter.InterfaceIndex -ServerAddresses ("10.100.1.100")
+    Set-DnsClientServerAddress -InterfaceIndex $adapter.InterfaceIndex -ServerAddresses ("10.100.0.2")
 } catch {
     Write-Host "❌ DNS config failed: $_"
 }

@@ -1,0 +1,175 @@
+{
+  "name": "aws_discovery_instruqt",
+  "provider_type": "Amazon Web Services",
+  "account_preference": "single",
+  "sync_interval": "15",
+  "desired_state": "enabled",
+  "credential_preference": {
+    "credential_type": "static"
+  },
+  "destination_types_enabled": [
+    "DNS"
+  ],
+  "source_configs": [
+    {
+      "cloud_credential_id": "{{cloud_credential_id}}",
+      "restricted_to_accounts": [
+        "{{account_id}}"
+      ],
+      "credential_config": {}
+    }
+  ],
+  "additional_config": {
+    "excluded_accounts": [],
+    "forward_zone_enabled": false,
+    "internal_ranges_enabled": false,
+    "federated_realms": [],
+    "object_type": {
+      "version": 1,
+      "discover_new": true,
+      "objects": [
+        {
+          "category": {
+            "id": "security",
+            "excluded": false
+          },
+          "resource_set": [
+            {
+              "id": "security_groups",
+              "excluded": false
+            }
+          ]
+        },
+        {
+          "category": {
+            "id": "networking-basics",
+            "excluded": false
+          },
+          "resource_set": [
+            {
+              "id": "internet-gateways",
+              "excluded": false
+            },
+            {
+              "id": "nat-gateways",
+              "excluded": false
+            },
+            {
+              "id": "transit-gateways",
+              "excluded": false
+            },
+            {
+              "id": "eips",
+              "excluded": false
+            },
+            {
+              "id": "route-tables",
+              "excluded": false
+            },
+            {
+              "id": "network-interfaces",
+              "excluded": false
+            },
+            {
+              "id": "vpn-connection",
+              "excluded": false
+            },
+            {
+              "id": "vpn-gateway",
+              "excluded": false
+            },
+            {
+              "id": "customer-gateways",
+              "excluded": false
+            },
+            {
+              "id": "ebs-volumes",
+              "excluded": false
+            },
+            {
+              "id": "directconnect-gateway",
+              "excluded": false
+            },
+            {
+              "id": "s3-buckets",
+              "excluded": false
+            },
+            {
+              "id": "s3-bucket-public-access-blocks",
+              "excluded": false
+            },
+            {
+              "id": "s3-bucket-policies",
+              "excluded": false
+            }
+          ]
+        },
+        {
+          "category": {
+            "id": "lbs",
+            "excluded": false
+          },
+          "resource_set": [
+            {
+              "id": "elbs",
+              "excluded": false
+            },
+            {
+              "id": "listeners",
+              "excluded": false
+            },
+            {
+              "id": "target-groups",
+              "excluded": false
+            }
+          ]
+        },
+        {
+          "category": {
+            "id": "compute",
+            "excluded": false
+          },
+          "resource_set": [
+            {
+              "id": "metrics",
+              "excluded": false
+            }
+          ]
+        },
+        {
+          "category": {
+            "id": "ipam",
+            "excluded": false
+          },
+          "resource_set": [
+            {
+              "id": "ipams",
+              "excluded": false
+            },
+            {
+              "id": "scopes",
+              "excluded": false
+            },
+            {
+              "id": "pools",
+              "excluded": false
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "destinations": [
+    {
+      "destination_type": "DNS",
+      "config": {
+        "dns": {
+          "consolidated_zone_data_enabled": true,
+          "view_id": "{{dns_view_id}}",
+          "sync_type": "read_write",
+          "resolver_endpoints_sync_enabled": false
+        }
+      }
+    }
+  ]
+}

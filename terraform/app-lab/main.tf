@@ -110,6 +110,7 @@ resource "bloxone_ipam_range" "aws_safe_range" {
   start  = "10.100.0.10"
   end    = "10.100.0.50"
   space  = bloxone_ipam_ip_space.ip_space_acme.id
+  depends_on = [bloxone_ipam_subnet.subnet_aws_vpc]
 
   tags = {
     reserved = "skip-aws-reserved"

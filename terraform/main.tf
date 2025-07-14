@@ -235,3 +235,16 @@ resource "aws_route53_record" "app" {
   ttl     = 60
   records = ["10.100.0.120"]
 }
+
+resource "aws_vpn_gateway" "vgw" {
+  vpc_id     = aws_vpc.main.id
+  amazon_side_asn = "64512" # optional: specify your ASN or let AWS assign
+  tags = {
+    Name = "infoblox-lab-vgw"
+  }
+}
+
+resource "aws_vpn_gateway_attachment" "attach" {
+  vpc_id         = aws_vpc.main.id
+  vpn_gateway_id = aws_vpn_gateway.vgw.id
+}

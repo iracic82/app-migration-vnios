@@ -13,3 +13,7 @@ output "ssh_access_to_app" {
   description = "SSH command to access the Dockerized Flask app instance"
   value       = "ssh -i instruqt-dc-key.pem ubuntu@${aws_eip.app_eip.public_ip}"
 }
+output "gm_public_ip" {
+  value = aws_eip.gm_eip.public_ip
+  description = "Public IP of the Infoblox GM instance (EIP on lan1)"
+}

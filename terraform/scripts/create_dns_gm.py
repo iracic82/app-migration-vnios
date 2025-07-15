@@ -37,7 +37,7 @@ if not gm_ip:
 # Set A record for Infoblox GM
 # ---------------------------
 prefix = os.getenv("INSTRUQT_PARTICIPANT_ID", "").strip()
-fqdn = f"{prefix + '-' if prefix else ''}infoblox.iracictechguru.com."
+fqdn = f"{prefix + '-' if prefix else ''}infoblox-app.iracictechguru.com."
 
 log(f"➡️  Creating A record: {fqdn} -> {gm_ip}")
 try:

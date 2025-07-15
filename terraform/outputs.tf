@@ -17,3 +17,8 @@ output "gm_public_ip" {
   value = aws_eip.gm_eip.public_ip
   description = "Public IP of the Infoblox GM instance (EIP on lan1)"
 }
+
+output "ssh_access_to_gm" {
+  description = "SSH command to access the Infoblox GM instance"
+  value       = "ssh -i instruqt-dc-key.pem admin@${aws_eip.gm_eip.public_ip}"
+}

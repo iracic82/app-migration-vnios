@@ -73,5 +73,5 @@ resource "aws_eip" "gm_eip" {
 resource "aws_eip_association" "gm_eip_assoc_mgmt" {
   network_interface_id = aws_network_interface.gm_lan1.id
   allocation_id        = aws_eip.gm_eip.id
-  private_ip_address   = "10.100.0.201"
+  private_ip_address   = "10.100.0.200"
 }

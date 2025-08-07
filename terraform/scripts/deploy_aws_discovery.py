@@ -104,12 +104,32 @@ class InfobloxSession:
 
     def fetch_dns_view_id(self):
         url = f"{self.base_url}/api/ddi/v1/dns/view"
-        response = self.session.get(url, headers=self._auth_headers())
-        response.raise_for_status()
-        dns_view_id = response.json().get("results", [{}])[0].get("id")
-        self._save_to_file("dns_view_id.txt", dns_view_id)
-        print(f"✅ DNS View ID saved: {dns_view_id}")
-        return dns_view_id
+        print("⏳ Waiting for DNS View to become accessible...")
+
+        timeout = 120
+        interval = 10
+        waited = 0
+
+        while waited < timeout:
+            try:
+                response = self.session.get(url, headers=self._auth_headers())
+                if response.status_code == 403:
+                    print("🚫 403 Forbidden – likely DDI not ready yet")
+                response.raise_for_status()
+                views = response.json().get("results", [])
+                if views:
+                    dns_view_id = views[0].get("id")
+                    self._save_to_file("dns_view_id.txt", dns_view_id)
+                    print(f"✅ DNS View ID saved: {dns_view_id}")
+                    return dns_view_id
+            except requests.HTTPError as e:
+                print(f"❌ Error fetching DNS view: {e}")
+
+            print(f"🕐 Still waiting for DNS view... Checked at {waited}s")
+            time.sleep(interval)
+            waited += interval
+
+        raise RuntimeError("❌ Timed out waiting for DNS View to be available")
 
     def inject_variables_into_payload(self, template_file, output_file, dns_view_id, cloud_credential_id, account_id):
         with open(template_file, "r") as f:
